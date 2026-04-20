@@ -1,0 +1,4 @@
+repo_mind_env/
+__pycache__/
+.env
+storage/
