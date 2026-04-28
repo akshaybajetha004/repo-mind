@@ -1,4 +1,10 @@
+cat <<EOF > .gitignore
 repo_mind_env/
 __pycache__/
+*.pyc
 .env
 storage/
+.DS_Store
+.idea/
+*.iml
+EOF

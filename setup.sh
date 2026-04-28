@@ -30,4 +30,13 @@ pip install llama-index-llms-ollama llama-index-embeddings-huggingface llama-ind
 echo "🔄 Ensuring Redis is running..."
 sudo service redis-server start
 
+echo "Checking for Redis Stack..."
+if redis-cli MODULE LIST | grep -q "search"; then
+    echo "✅ Redis Stack with Search module detected."
+else
+    echo "❌ Error: Redis Stack is not running or 'search' module is missing."
+    echo "Please install redis-stack-server or run it via Docker."
+    exit 1
+fi
+
 echo "✨ Setup Complete! Run 'source repo_mind_env/bin/activate' to start."

@@ -3,6 +3,7 @@ from llama_index.llms.ollama import Ollama
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.core import Settings, VectorStoreIndex, SimpleDirectoryReader
 
+from cache import init_persistent_index
 
 def setup_engine():
     # 1. Setup the LLM (The Brain)
@@ -30,9 +31,12 @@ def load_repository(path="/home/akshaybajetha/Desktop/core_projects/bot/api_new"
         required_exts=[".py", ".md", ".txt"],
         exclude=["repo_mind_env/*", ".git/*", "node_modules/*", "venv/*", "__pycache__/*", "*.pyc", "dist/*", "build/*"]
     ).load_data()
+    repo_name = os.path.basename(path)
+    print(repo_name)
     print(f"Found {len(documents)} document chunks. Starting Indexing...")
     # Create a searchable index from my files
-    index = VectorStoreIndex.from_documents(documents, show_progress=True)
+    index = init_persistent_index(documents, index_name=f"repo_{repo_name}")
+    # index = VectorStoreIndex.from_documents(documents, show_progress=True)
     return index.as_query_engine()
 
 
