@@ -53,16 +53,22 @@ def init_persistent_index(documents, index_name="repo_mind_core"):
     cache_manager = RedisCacheManager(index_name=index_name)
     vector_store = cache_manager.get_vector_store()
 
-    # CHECK: Does the index actually have data in Redis?
-    # We use the internal redis_client from redisvl
-    if vector_store._index.exists():
-        print(f"🚀 [CACHE HIT] Found existing vectors for {index_name}. Loading instantly...")
-        # We initialize the index directly from the vector_store
-        index = VectorStoreIndex.from_vector_store(
-            vector_store=vector_store
-        )
+    # BETTER CHECK: Does the index exist AND have documents?
+    index_exists = vector_store._index.exists()
+
+    # Check if there are actually keys in this index
+    doc_count = 0
+    if index_exists:
+        # Get count of documents in the index
+        stats = vector_store._index.info()
+        doc_count = int(stats.get('num_docs', 0))
+
+    if index_exists and doc_count > 0:
+        print(f"🚀 [CACHE HIT] Found {doc_count} vectors. Loading...")
+        index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
     else:
-        print(f"⚠️ [CACHE MISS] No vectors found for {index_name}. Embedding now...")
+        print(f"⚠️ [CACHE MISS] Index empty or missing. Embedding {len(documents)} docs...")
+        # Force a fresh index if it was empty
         storage_context = cache_manager.get_storage_context()
         index = VectorStoreIndex.from_documents(
             documents,
